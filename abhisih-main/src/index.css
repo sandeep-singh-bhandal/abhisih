@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Environment Game Design System - Nature-inspired colors and effects */
+
+@layer base {
+  :root {
+    /* Nature Color Palette */
+    --background: 120 20% 97%;
+    --foreground: 140 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 140 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 140 30% 15%;
+
+    /* Forest Green Primary */
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 142 76% 50%;
+
+    /* Earth Tones */
+    --secondary: 39 77% 83%;
+    --secondary-foreground: 25 45% 20%;
+
+    --muted: 120 20% 95%;
+    --muted-foreground: 140 15% 45%;
+
+    /* Sky Blue Accent */
+    --accent: 200 95% 88%;
+    --accent-foreground: 200 50% 25%;
+
+    /* Reward Gold */
+    --gold: 45 100% 65%;
+    --gold-foreground: 25 45% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 120 15% 85%;
+    --input: 120 15% 90%;
+    --ring: 142 76% 36%;
+
+    /* Nature Gradients */
+    --gradient-earth-sky: linear-gradient(135deg, hsl(142 76% 36%), hsl(200 95% 70%));
+    --gradient-forest: linear-gradient(180deg, hsl(142 76% 36%), hsl(120 60% 25%));
+    --gradient-reward: linear-gradient(135deg, hsl(45 100% 65%), hsl(39 100% 75%));
+    --gradient-nature: linear-gradient(45deg, hsl(142 76% 36%) 0%, hsl(120 60% 40%) 50%, hsl(200 95% 70%) 100%);
+
+    /* Shadows and Glows */
+    --shadow-nature: 0 10px 30px -10px hsl(142 76% 36% / 0.3);
+    --glow-reward: 0 0 20px hsl(45 100% 65% / 0.4);
+    --glow-primary: 0 0 15px hsl(142 76% 50% / 0.3);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Nature Animations */
+@layer utilities {
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-grow {
+    animation: grow 0.6s ease-out;
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+  
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s ease-in-out infinite;
+  }
+
+  .gradient-earth-sky {
+    background: var(--gradient-earth-sky);
+  }
+  
+  .gradient-forest {
+    background: var(--gradient-forest);
+  }
+  
+  .gradient-reward {
+    background: var(--gradient-reward);
+  }
+  
+  .gradient-nature {
+    background: var(--gradient-nature);
+  }
+  
+  .shadow-nature {
+    box-shadow: var(--shadow-nature);
+  }
+  
+  .glow-reward {
+    box-shadow: var(--glow-reward);
+  }
+  
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes grow {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
