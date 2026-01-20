@@ -4,15 +4,22 @@ import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from "dotenv";
+import { connectDB } from './lib/db.js';
+import cookieParser from 'cookie-parser';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors(
+  {
+    origin: "http://localhost:8081",
+    credentials: true
+  }
+));
 app.use(express.json());
+app.use(cookieParser())
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI ;
-mongoose.connect(MONGODB_URI);
+await connectDB()
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -104,15 +111,19 @@ app.post('/api/auth/signup', async (req, res) => {
     await user.save();
 
     // Generate token
-    const token = jwt.sign(
-      { id: user._id, username: user.username },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("authToken", token, {
+      httpOnly: true, // prevent JS to access the cookie
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", // CSRF protection
+      maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiration time
+    });
 
     res.status(201).json({
       message: 'User created successfully',
-      token,
       user: {
         id: user._id,
         username: user.username,
@@ -159,6 +170,40 @@ app.post('/api/auth/signin', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+// Logout User - /api/auth/logout
+app.post("/api/auth/logout", async (req, res) => {
+  try {
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    });
+    return res.json({ success: true, message: "Logged Out Successfully" });
+  } catch (err) {
+    console.log(err.message);
+    res.json({ success: false, message: err.message });
+  }
+})
+
+// auth user
+app.post("/api/auth/is-auth", async (req, res) => {
+  const { authToken } = req.cookies;
+
+  if (!authToken) return res.json({ success: false, message: "Please Login First" });
+
+  try {
+    const decodedToken = jwt.verify(authToken, process.env.JWT_SECRET_KEY);
+    if (decodedToken.id) {
+      const user = await User.findById(decodedToken.id).select("-password")
+      res.json({ success: true, user });
+    } else {
+      res.json({ success: false, message: "Not Authorized" });
+    }
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+})
 
 // ==================== QUIZ GAME ROUTES ====================
 
@@ -208,10 +253,10 @@ app.get('/api/quiz/stats', authenticateToken, async (req, res) => {
     const stats = {
       totalGames: quizzes.length,
       totalScore: quizzes.reduce((sum, quiz) => sum + quiz.score, 0),
-      averageScore: quizzes.length > 0 
+      averageScore: quizzes.length > 0
         ? (quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / quizzes.length).toFixed(2)
         : 0,
-      bestScore: quizzes.length > 0 
+      bestScore: quizzes.length > 0
         ? Math.max(...quizzes.map(q => q.score))
         : 0,
       byDifficulty: {
@@ -274,13 +319,13 @@ app.get('/api/picture/stats', authenticateToken, async (req, res) => {
     const stats = {
       totalGames: games.length,
       totalScore: games.reduce((sum, game) => sum + game.score, 0),
-      averageScore: games.length > 0 
+      averageScore: games.length > 0
         ? (games.reduce((sum, game) => sum + game.score, 0) / games.length).toFixed(2)
         : 0,
-      bestScore: games.length > 0 
+      bestScore: games.length > 0
         ? Math.max(...games.map(g => g.score))
         : 0,
-      highestLevel: games.length > 0 
+      highestLevel: games.length > 0
         ? Math.max(...games.map(g => g.level))
         : 0,
       totalImagesIdentified: games.reduce((sum, game) => sum + game.imagesIdentified.length, 0)
@@ -313,14 +358,14 @@ app.get('/api/user/overall-stats', authenticateToken, async (req, res) => {
     const stats = {
       quiz: {
         totalGames: quizzes.length,
-        averageScore: quizzes.length > 0 
+        averageScore: quizzes.length > 0
           ? (quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / quizzes.length).toFixed(2)
           : 0,
         bestScore: quizzes.length > 0 ? Math.max(...quizzes.map(q => q.score)) : 0
       },
       picture: {
         totalGames: pictureGames.length,
-        averageScore: pictureGames.length > 0 
+        averageScore: pictureGames.length > 0
           ? (pictureGames.reduce((sum, game) => sum + game.score, 0) / pictureGames.length).toFixed(2)
           : 0,
         bestScore: pictureGames.length > 0 ? Math.max(...pictureGames.map(g => g.score)) : 0

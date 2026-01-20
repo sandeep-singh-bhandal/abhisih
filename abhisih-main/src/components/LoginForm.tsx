@@ -3,20 +3,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import axios from "axios"
+import { useNavigate } from "react-router-dom";
 
-interface LoginFormProps {
-  onLogin: (username: string) => void;
-}
+axios.defaults.withCredentials = true;
 
-const LoginForm = ({ onLogin }: LoginFormProps) => {
+const LoginForm = ({ setUser }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim()) {
-      onLogin(username.trim());
+    try {
+      const { data } = await axios.post("http://localhost:5000/api/auth/signup", {
+        username,
+        password
+      })
+      navigate("/")
+      setUser(data.user)
+    } catch (error) {
+      console.log(error);
+
     }
   };
 
@@ -38,13 +47,13 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             {isLogin ? "Welcome Back!" : "Join the Mission!"}
           </CardTitle>
           <CardDescription>
-            {isLogin 
-              ? "Sign in to continue your environmental journey" 
+            {isLogin
+              ? "Sign in to continue your environmental journey"
               : "Create an account to start saving the planet"
             }
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -59,7 +68,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 className="border-primary/20 focus:border-primary"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -72,28 +81,28 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 className="border-primary/20 focus:border-primary"
               />
             </div>
-            
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="w-full gradient-forest hover:opacity-90 transition-opacity glow-primary"
             >
               {isLogin ? "Sign In" : "Create Account"}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center">
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
               className="text-primary hover:underline text-sm"
             >
-              {isLogin 
-                ? "Don't have an account? Sign up" 
+              {isLogin
+                ? "Don't have an account? Sign up"
                 : "Already have an account? Sign in"
               }
             </button>
           </div>
-          
+
         </CardContent>
       </Card>
     </div>

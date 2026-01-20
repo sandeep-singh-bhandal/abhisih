@@ -4,6 +4,8 @@ import LoginForm from "@/components/LoginForm";
 import Dashboard from "@/components/Dashboard";
 import QuizGame from "@/components/QuizGame";
 import PictureGame from "@/components/PictureGame";
+import api from "@/lib/axios";
+import { useNavigate } from "react-router-dom";
 
 type GameState = 'loading' | 'login' | 'dashboard' | 'quiz' | 'picture';
 
@@ -14,7 +16,7 @@ interface UserStats {
   quizzesCompleted: number;
 }
 
-const Index = () => {
+const Index = ({setUser}) => {
   const [gameState, setGameState] = useState<GameState>('loading');
   const [username, setUsername] = useState<string>('');
   const [userStats, setUserStats] = useState<UserStats>({
@@ -23,20 +25,22 @@ const Index = () => {
     level: 1,
     quizzesCompleted: 0
   });
+  const navigate = useNavigate()
 
   const handleLoadingComplete = () => {
     setGameState('login');
   };
 
-  const handleLogin = (user: string) => {
-    setUsername(user);
-    setGameState('dashboard');
-  };
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
     setUsername('');
     setUserStats({ points: 0, badges: [], level: 1, quizzesCompleted: 0 });
-    setGameState('login');
+    const { data } = await api.post("/auth/logout");
+      if (data.success) {
+        navigate("/login");
+        setUser(null)
+      }
+      
   };
 
   const handleQuizComplete = (points: number, badges: string[]) => {
@@ -64,13 +68,9 @@ const Index = () => {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
-  if (gameState === 'login') {
-    return <LoginForm onLogin={handleLogin} />;
-  }
-
   if (gameState === 'quiz') {
     return (
-      <QuizGame 
+      <QuizGame
         onComplete={handleQuizComplete}
         onBack={() => setGameState('dashboard')}
       />
@@ -79,7 +79,7 @@ const Index = () => {
 
   if (gameState === 'picture') {
     return (
-      <PictureGame 
+      <PictureGame
         onComplete={handlePictureGameComplete}
         onBack={() => setGameState('dashboard')}
       />
