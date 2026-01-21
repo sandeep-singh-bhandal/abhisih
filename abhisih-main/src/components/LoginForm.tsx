@@ -17,7 +17,7 @@ const LoginForm = ({ setUser }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("http://localhost:5000/api/auth/signup", {
+      const { data } = await axios.post(`http://localhost:5000/api/auth/${isLogin ? "signin" : "signup"}`, {
         username,
         password
       })
